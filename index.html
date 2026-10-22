@@ -3,29 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>UNIQLO Canada Expansion: Neighbourhood Income & Aritzia Gap Analysis</title>
+  <title>UNIQLO Canada Expansion: All 246 Stores & Municipal Income Boundaries</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    #map { width: 100%; height: 100vh; background: #f4f6f8; }
+    #map { width: 100%; height: 100vh; background: #e9ecef; }
     
     /* Presentation Header Overlay */
     .header-box {
-      position: absolute; top: 15px; left: 60px; z-index: 1000;
-      background: rgba(255, 255, 255, 0.95); padding: 14px 22px;
+      position: absolute; top: 15px; left: 55px; z-index: 1000;
+      background: rgba(255, 255, 255, 0.96); padding: 14px 20px;
       border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-      border-left: 6px solid #FF0000; max-width: 460px;
+      border-left: 6px solid #FF0000; max-width: 440px;
     }
-    .header-box h1 { margin: 0 0 5px 0; font-size: 18px; color: #111; }
-    .header-box p { margin: 0; font-size: 12.5px; color: #555; }
+    .header-box h1 { margin: 0 0 5px 0; font-size: 17px; color: #111; }
+    .header-box p { margin: 0; font-size: 12px; color: #555; line-height: 1.4; }
 
     /* City Quick-Jump Buttons for PowerPoint Slides */
     .city-nav {
       position: absolute; top: 15px; right: 20px; z-index: 1000;
-      display: flex; gap: 8px; flex-wrap: wrap;
+      display: flex; gap: 6px; flex-wrap: wrap; max-width: 55%; justify-content: flex-end;
     }
     .city-btn {
-      background: #111; color: #fff; border: none; padding: 8px 14px;
+      background: #111; color: #fff; border: none; padding: 8px 13px;
       border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2); transition: 0.2s;
     }
@@ -33,218 +33,650 @@
 
     /* Legend Styling */
     .legend {
-      background: rgba(255, 255, 255, 0.96); padding: 14px 18px;
+      background: rgba(255, 255, 255, 0.96); padding: 12px 16px;
       border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-      line-height: 22px; color: #222; font-size: 12.5px;
+      line-height: 20px; color: #222; font-size: 12px;
     }
-    .legend h4 { margin: 0 0 8px 0; font-size: 13.5px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+    .legend h4 { margin: 0 0 6px 0; font-size: 13px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
     .legend i {
-      width: 16px; height: 16px; float: left; margin-right: 10px;
-      opacity: 0.85; border-radius: 3px; margin-top: 3px;
+      width: 15px; height: 15px; float: left; margin-right: 8px;
+      opacity: 0.85; border-radius: 2px; margin-top: 2px; border: 1px solid #555;
     }
     .pin-dot {
-      display: inline-block; width: 12px; height: 12px;
-      border-radius: 50%; margin-right: 10px; border: 2px solid #fff;
+      display: inline-block; width: 11px; height: 11px;
+      border-radius: 50%; margin-right: 8px; border: 1.5px solid #fff;
       box-shadow: 0 0 3px rgba(0,0,0,0.5);
+    }
+
+    /* Zone Label Tooltip */
+    .zone-label {
+      background: rgba(255,255,255,0.85);
+      border: 1px solid #333;
+      border-radius: 4px;
+      padding: 2px 5px;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #111;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
   </style>
 </head>
 <body>
 
   <div class="header-box">
-    <h1>UNIQLO Expansion & Income Map</h1>
-    <p>Comparing <strong>Aritzia</strong> locations vs. <strong>UNIQLO</strong> white-space inside high-income Canadian neighbourhoods (Census Household Income Overlay).</p>
+    <h1>UNIQLO Expansion & Municipal Income Map</h1>
+    <p>All <strong>246 Canadian Stores</strong> (Uniqlo, Aritzia, Zara, H&M) plotted over contiguous municipal & district household income transition boundaries.</p>
   </div>
 
   <div class="city-nav">
-    <button class="city-btn" onclick="flyToCity(49.2827, -123.1207, 12)">Vancouver Metro</button>
-    <button class="city-btn" onclick="flyToCity(43.6850, -79.3888, 12)">Toronto Core</button>
-    <button class="city-btn" onclick="flyToCity(43.0150, -81.2750, 12)">London (Masonville)</button>
-    <button class="city-btn" onclick="flyToCity(44.6483, -63.6000, 13)">Halifax Peninsula</button>
-    <button class="city-btn" onclick="flyToCity(50.9984, -114.0700, 11)">Calgary</button>
+    <button class="city-btn" onclick="flyToCity(49.2550, -123.0800, 11)">Vancouver Metro</button>
+    <button class="city-btn" onclick="flyToCity(43.7100, -79.4200, 11)">Greater Toronto</button>
+    <button class="city-btn" onclick="flyToCity(51.0100, -114.0700, 11)">Calgary</button>
+    <button class="city-btn" onclick="flyToCity(43.0000, -81.2500, 12)">London</button>
+    <button class="city-btn" onclick="flyToCity(44.6550, -63.6000, 12)">Halifax</button>
+    <button class="city-btn" onclick="flyToCity(45.5000, -73.6200, 11)">Montreal</button>
+    <button class="city-btn" onclick="flyToCity(49.5000, -96.0000, 4)">All Canada</button>
   </div>
 
   <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // Initialize Map centered on Vancouver by default
-    const map = L.map('map').setView([49.2827, -123.1207], 12);
+    // Initialize Map centered on Metro Vancouver
+    const map = L.map('map').setView([49.2550, -123.0800], 11);
 
     // Clean Esri Light Gray Canvas Basemap (100% Free, NO API key required)
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-      attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ | Statistics Canada Income Data'
+      attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ | Statistics Canada Census Income Divisions'
     }).addTo(map);
 
     function flyToCity(lat, lng, zoom) {
       map.flyTo([lat, lng], zoom, { duration: 1.2 });
     }
 
-    // Color scale for Average Household Income
+    // Create custom panes so Store Pins always stay on top of Income Polygons
+    map.createPane('incomePane');
+    map.getPane('incomePane').style.zIndex = 350;
+    map.createPane('storePane');
+    map.getPane('storePane').style.zIndex = 650;
+    map.createPane('targetPane');
+    map.getPane('targetPane').style.zIndex = 700;
+
+    // Color scale for Average Household Income (6 distinct brackets)
     function getIncomeColor(income) {
       return income >= 220000 ? '#00441b' :
              income >= 175000 ? '#1b7837' :
              income >= 140000 ? '#5aae61' :
              income >= 115000 ? '#a6dba0' :
-                                '#d9f0d3';
+             income >= 95000  ? '#d9f0d3' :
+                                '#f7fcb9';
     }
 
-    // High-Income Neighbourhood Polygons (GeoJSON)
-    const incomeNeighbourhoods = {
+    // Contiguous Municipal & Sub-Municipal Income Boundary Polygons
+    // Shared coordinates create exact dividing lines where household incomes change
+    const municipalIncomeGeoJSON = {
       "type": "FeatureCollection",
       "features": [
+        // ================= VANCOUVER METRO =================
         {
           "type": "Feature",
-          "properties": { "name": "West Vancouver / Ambleside / British Properties", "avg_income": 235000, "target": "Park Royal Shopping Centre" },
-          "geometry": { "type": "Polygon", "coordinates": [[[-123.200, 49.322], [-123.125, 49.322], [-123.125, 49.365], [-123.200, 49.365], [-123.200, 49.322]]] }
+          "properties": { "city": "Metro Vancouver", "name": "District of West Vancouver (Ambleside / British Properties)", "avg_income": 235000, "note": "Park Royal Target Node" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-123.265, 49.323], [-123.125, 49.323], [-123.125, 49.375], [-123.265, 49.375], [-123.265, 49.323]]] }
         },
         {
           "type": "Feature",
-          "properties": { "name": "Downtown Vancouver / Coal Harbour / Yaletown", "avg_income": 148000, "target": "Robson St & CF Pacific Centre" },
-          "geometry": { "type": "Polygon", "coordinates": [[[-123.145, 49.272], [-123.105, 49.272], [-123.105, 49.295], [-123.145, 49.295], [-123.145, 49.272]]] }
+          "properties": { "city": "Metro Vancouver", "name": "City & District of North Vancouver", "avg_income": 152000, "note": "Adjacent North Shore Trade Area" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-123.125, 49.305], [-122.950, 49.305], [-122.950, 49.375], [-123.125, 49.375], [-123.125, 49.305]]] }
         },
         {
           "type": "Feature",
-          "properties": { "name": "Oakridge / Shaughnessy / Kerrisdale (Vancouver West Side)", "avg_income": 215000, "target": "Oakridge Park" },
-          "geometry": { "type": "Polygon", "coordinates": [[[-123.165, 49.218], [-123.105, 49.218], [-123.105, 49.252], [-123.165, 49.252], [-123.165, 49.218]]] }
+          "properties": { "city": "Metro Vancouver", "name": "Vancouver Downtown Peninsula (Coal Harbour / Yaletown / West End)", "avg_income": 148000, "note": "Robson St & CF Pacific Centre Flagship Target" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-123.155, 49.272], [-123.098, 49.272], [-123.098, 49.302], [-123.155, 49.302], [-123.155, 49.272]]] }
         },
         {
           "type": "Feature",
-          "properties": { "name": "North Burnaby / Brentwood Town Centre", "avg_income": 135000, "target": "The Amazing Brentwood" },
-          "geometry": { "type": "Polygon", "coordinates": [[[-123.025, 49.255], [-122.980, 49.255], [-122.980, 49.285], [-123.025, 49.285], [-123.025, 49.255]]] }
+          "properties": { "city": "Metro Vancouver", "name": "Vancouver West Side (Oakridge / Shaughnessy / Kerrisdale / Kitsilano)", "avg_income": 215000, "note": "Oakridge Park Target Node" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-123.225, 49.205], [-123.098, 49.205], [-123.098, 49.272], [-123.225, 49.272], [-123.225, 49.205]]] }
         },
         {
           "type": "Feature",
-          "properties": { "name": "Yorkville / Rosedale / Annex (Toronto)", "avg_income": 295000, "target": "Bloor Street West Flagship" },
-          "geometry": { "type": "Polygon", "coordinates": [[[-79.408, 43.665], [-79.372, 43.665], [-79.372, 43.688], [-79.408, 43.688], [-79.408, 43.665]]] }
+          "properties": { "city": "Metro Vancouver", "name": "Vancouver East Side (Mount Pleasant / Commercial / Hastings)", "avg_income": 106000, "note": "Boundary at Ontario/Main St" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-123.098, 49.205], [-123.023, 49.205], [-123.023, 49.290], [-123.098, 49.290], [-123.098, 49.205]]] }
         },
         {
           "type": "Feature",
-          "properties": { "name": "Don Mills / Bridle Path / Leaside (Toronto)", "avg_income": 340000, "target": "CF Shops at Don Mills" },
-          "geometry": { "type": "Polygon", "coordinates": [[[-79.385, 43.715], [-79.325, 43.715], [-79.325, 43.755], [-79.385, 43.755], [-79.385, 43.715]]] }
+          "properties": { "city": "Metro Vancouver", "name": "North Burnaby (Brentwood / Capitol Hill / Burnaby Heights)", "avg_income": 135000, "note": "The Amazing Brentwood Target Node" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-123.023, 49.248], [-122.915, 49.248], [-122.915, 49.290], [-123.023, 49.290], [-123.023, 49.248]]] }
         },
         {
           "type": "Feature",
-          "properties": { "name": "Queen West / King West / Trinity-Bellwoods (Toronto)", "avg_income": 145000, "target": "Queen Street West" },
-          "geometry": { "type": "Polygon", "coordinates": [[[-79.415, 43.642], [-79.385, 43.642], [-79.385, 43.655], [-79.415, 43.655], [-79.415, 43.642]]] }
+          "properties": { "city": "Metro Vancouver", "name": "South Burnaby (Metrotown / Highgate / Edmonds)", "avg_income": 104000, "note": "Existing UNIQLO Flagship at Metrotown" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-123.023, 49.200], [-122.915, 49.200], [-122.915, 49.248], [-123.023, 49.248], [-123.023, 49.200]]] }
         },
         {
           "type": "Feature",
-          "properties": { "name": "North London / Masonville / Sunningdale", "avg_income": 168000, "target": "CF Masonville Place" },
-          "geometry": { "type": "Polygon", "coordinates": [[[-81.310, 43.010], [-81.250, 43.010], [-81.250, 43.045], [-81.310, 43.045], [-81.310, 43.010]]] }
+          "properties": { "city": "Metro Vancouver", "name": "City of Richmond", "avg_income": 102000, "note": "Existing UNIQLO at CF Richmond Centre" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-123.205, 49.120], [-123.040, 49.120], [-123.040, 49.205], [-123.205, 49.205], [-123.205, 49.120]]] }
         },
         {
           "type": "Feature",
-          "properties": { "name": "Halifax Peninsula (West End & South End)", "avg_income": 158000, "target": "Halifax Shopping Centre" },
-          "geometry": { "type": "Polygon", "coordinates": [[[-63.635, 44.625], [-63.565, 44.625], [-63.565, 44.660], [-63.635, 44.660], [-63.635, 44.625]]] }
+          "properties": { "city": "Metro Vancouver", "name": "Coquitlam & Port Moody (Tri-Cities)", "avg_income": 128000, "note": "Existing UNIQLO at Coquitlam Centre" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-122.915, 49.225], [-122.740, 49.225], [-122.740, 49.310], [-122.915, 49.310], [-122.915, 49.225]]] }
         },
         {
           "type": "Feature",
-          "properties": { "name": "South Calgary / Lake Bonavista / Willow Park", "avg_income": 182000, "target": "Southcentre Mall" },
-          "geometry": { "type": "Polygon", "coordinates": [[[-114.095, 50.925], [-114.035, 50.925], [-114.035, 50.965], [-114.095, 50.965], [-114.095, 50.925]]] }
+          "properties": { "city": "Metro Vancouver", "name": "Surrey North / Guildford / Fleetwood", "avg_income": 114000, "note": "Existing UNIQLO at Guildford Town Centre" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-122.915, 49.140], [-122.730, 49.140], [-122.730, 49.225], [-122.915, 49.225], [-122.915, 49.140]]] }
+        },
+
+        // ================= GREATER TORONTO AREA (GTA) =================
+        {
+          "type": "Feature",
+          "properties": { "city": "Greater Toronto Area", "name": "Midtown Toronto / Yorkville / Rosedale / Forest Hill", "avg_income": 295000, "note": "Bloor Street West Flagship Target" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-79.435, 43.665], [-79.365, 43.665], [-79.365, 43.725], [-79.435, 43.725], [-79.435, 43.665]]] }
+        },
+        {
+          "type": "Feature",
+          "properties": { "city": "Greater Toronto Area", "name": "Don Mills / Bridle Path / Lawrence Park / Leaside", "avg_income": 340000, "note": "CF Shops at Don Mills Target Node" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-79.365, 43.695], [-79.310, 43.695], [-79.310, 43.760], [-79.365, 43.760], [-79.365, 43.695]]] }
+        },
+        {
+          "type": "Feature",
+          "properties": { "city": "Greater Toronto Area", "name": "Downtown Toronto Core & Financial District", "avg_income": 124000, "note": "Existing UNIQLO at Eaton Centre & Union" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-79.385, 43.638], [-79.350, 43.638], [-79.350, 43.665], [-79.385, 43.665], [-79.385, 43.638]]] }
+        },
+        {
+          "type": "Feature",
+          "properties": { "city": "Greater Toronto Area", "name": "Queen West / King West / Trinity-Bellwoods / Liberty Village", "avg_income": 145000, "note": "Queen Street West Target Node" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-79.450, 43.635], [-79.385, 43.635], [-79.385, 43.665], [-79.450, 43.665], [-79.450, 43.635]]] }
+        },
+        {
+          "type": "Feature",
+          "properties": { "city": "Greater Toronto Area", "name": "North York West (Yorkdale / Downsview)", "avg_income": 118000, "note": "Existing UNIQLO Flagship at Yorkdale" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-79.520, 43.700], [-79.435, 43.700], [-79.435, 43.780], [-79.520, 43.780], [-79.520, 43.700]]] }
+        },
+        {
+          "type": "Feature",
+          "properties": { "city": "Greater Toronto Area", "name": "North York East (Willowdale / Fairview)", "avg_income": 122000, "note": "Existing UNIQLO at CF Fairview Mall" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-79.435, 43.760], [-79.310, 43.760], [-79.310, 43.800], [-79.435, 43.800], [-79.435, 43.760]]] }
+        },
+        {
+          "type": "Feature",
+          "properties": { "city": "Greater Toronto Area", "name": "Etobicoke South & Central (Kingsway / Sherway)", "avg_income": 156000, "note": "Existing UNIQLO at CF Sherway Gardens" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-79.590, 43.590], [-79.470, 43.590], [-79.470, 43.675], [-79.590, 43.675], [-79.590, 43.590]]] }
+        },
+        {
+          "type": "Feature",
+          "properties": { "city": "Greater Toronto Area", "name": "Scarborough", "avg_income": 101000, "note": "Existing UNIQLO at Scarborough Town Centre" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-79.310, 43.700], [-79.160, 43.700], [-79.160, 43.820], [-79.310, 43.820], [-79.310, 43.700]]] }
+        },
+        {
+          "type": "Feature",
+          "properties": { "city": "Greater Toronto Area", "name": "City of Mississauga", "avg_income": 128000, "note": "Existing UNIQLO at Square One & Heartland" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-79.760, 43.520], [-79.590, 43.520], [-79.590, 43.650], [-79.760, 43.650], [-79.760, 43.520]]] }
+        },
+        {
+          "type": "Feature",
+          "properties": { "city": "Greater Toronto Area", "name": "Town of Oakville", "avg_income": 212000, "note": "Ultra-Affluent West GTA Municipality (Aritzia at Oakville Place)" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-79.820, 43.390], [-79.640, 43.390], [-79.640, 43.520], [-79.820, 43.520], [-79.820, 43.390]]] }
+        },
+        {
+          "type": "Feature",
+          "properties": { "city": "Greater Toronto Area", "name": "Vaughan & Richmond Hill", "avg_income": 158000, "note": "Existing UNIQLO at Vaughan Mills & Hillcrest" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-79.620, 43.800], [-79.380, 43.800], [-79.380, 43.910], [-79.620, 43.910], [-79.620, 43.800]]] }
+        },
+        {
+          "type": "Feature",
+          "properties": { "city": "Greater Toronto Area", "name": "City of Markham", "avg_income": 134000, "note": "Existing UNIQLO at CF Markville" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-79.380, 43.800], [-79.220, 43.800], [-79.220, 43.910], [-79.380, 43.910], [-79.380, 43.800]]] }
+        },
+
+        // ================= CALGARY =================
+        {
+          "type": "Feature",
+          "properties": { "city": "Calgary", "name": "Calgary Northwest (Varsity / Brentwood / Tuscany)", "avg_income": 146000, "note": "Existing UNIQLO at CF Market Mall" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-114.230, 51.055], [-114.090, 51.055], [-114.090, 51.145], [-114.230, 51.145], [-114.230, 51.055]]] }
+        },
+        {
+          "type": "Feature",
+          "properties": { "city": "Calgary", "name": "Calgary Centre & Inner-City West (Mount Royal / Elboya / Beltline)", "avg_income": 195000, "note": "Existing UNIQLO at Chinook / Aritzia at The CORE" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-114.160, 50.985], [-114.035, 50.985], [-114.035, 51.055], [-114.160, 51.055], [-114.160, 50.985]]] }
+        },
+        {
+          "type": "Feature",
+          "properties": { "city": "Calgary", "name": "Calgary South (Lake Bonavista / Willow Park / Eagle Ridge)", "avg_income": 182000, "note": "Southcentre Mall Target Node" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-114.160, 50.900], [-114.010, 50.900], [-114.010, 50.985], [-114.160, 50.985], [-114.160, 50.900]]] }
+        },
+        {
+          "type": "Feature",
+          "properties": { "city": "Calgary", "name": "Calgary Northeast (Sunridge / Marlborough)", "avg_income": 96000, "note": "Boundary at Deerfoot Trail" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-114.035, 51.020], [-113.910, 51.020], [-113.910, 51.130], [-114.035, 51.130], [-114.035, 51.020]]] }
+        },
+
+        // ================= LONDON, ONTARIO =================
+        {
+          "type": "Feature",
+          "properties": { "city": "London", "name": "North London (Masonville / Sunningdale / Uplands)", "avg_income": 168000, "note": "CF Masonville Place Target Node" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-81.330, 43.005], [-81.210, 43.005], [-81.210, 43.055], [-81.330, 43.055], [-81.330, 43.005]]] }
+        },
+        {
+          "type": "Feature",
+          "properties": { "city": "London", "name": "West London (Byron / Oakridge / Hyde Park)", "avg_income": 144000, "note": "Affluent Western Suburbs feeding Masonville" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-81.370, 42.945], [-81.280, 42.945], [-81.280, 43.005], [-81.370, 43.005], [-81.370, 42.945]]] }
+        },
+        {
+          "type": "Feature",
+          "properties": { "city": "London", "name": "Central & East London", "avg_income": 88000, "note": "Income transition south of Oxford St" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-81.280, 42.960], [-81.160, 42.960], [-81.160, 43.005], [-81.280, 43.005], [-81.280, 42.960]]] }
+        },
+        {
+          "type": "Feature",
+          "properties": { "city": "London", "name": "South London (White Oaks / Westmount)", "avg_income": 103000, "note": "H&M at White Oaks Mall" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-81.300, 42.905], [-81.180, 42.905], [-81.180, 42.960], [-81.300, 42.960], [-81.300, 42.905]]] }
+        },
+
+        // ================= HALIFAX, NOVA SCOTIA =================
+        {
+          "type": "Feature",
+          "properties": { "city": "Halifax", "name": "Halifax South End & Northwest Arm", "avg_income": 184000, "note": "Highest-Income Halifax District" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-63.615, 44.615], [-63.565, 44.615], [-63.565, 44.643], [-63.615, 44.643], [-63.615, 44.615]]] }
+        },
+        {
+          "type": "Feature",
+          "properties": { "city": "Halifax", "name": "Halifax West End & Armdale", "avg_income": 146000, "note": "Halifax Shopping Centre Target Node" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-63.650, 44.635], [-63.595, 44.635], [-63.595, 44.665], [-63.650, 44.665], [-63.650, 44.635]]] }
+        },
+        {
+          "type": "Feature",
+          "properties": { "city": "Halifax", "name": "Halifax North End & Downtown", "avg_income": 102000, "note": "Boundary at Quinpool / Robie St" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-63.595, 44.643], [-63.565, 44.643], [-63.565, 44.680], [-63.595, 44.680], [-63.595, 44.643]]] }
+        },
+        {
+          "type": "Feature",
+          "properties": { "city": "Halifax", "name": "Dartmouth (Mic Mac / Portland Hills)", "avg_income": 112000, "note": "H&M at Mic Mac Mall" },
+          "geometry": { "type": "Polygon", "coordinates": [[[-63.565, 44.650], [-63.490, 44.650], [-63.490, 44.710], [-63.565, 44.710], [-63.565, 44.650]]] }
         }
       ]
     };
 
-    // Add Income Choropleth Layer
-    L.geoJSON(incomeNeighbourhoods, {
+    // Build Income Layer Group with Exact Dividing Lines
+    const incomeLayer = L.geoJSON(municipalIncomeGeoJSON, {
+      pane: 'incomePane',
       style: function(feature) {
         return {
           fillColor: getIncomeColor(feature.properties.avg_income),
-          weight: 2,
+          weight: 2.5,
           opacity: 1,
-          color: '#1b7837',
-          dashArray: '4',
-          fillOpacity: 0.42
+          color: '#1b4332', // Crisp dark boundary line where municipal/district income changes
+          fillOpacity: 0.48
         };
       },
       onEachFeature: function(feature, layer) {
         layer.bindPopup(
-          `<strong>Neighbourhood:</strong> ${feature.properties.name}<br>` +
-          `<strong>Avg Household Income:</strong> $${feature.properties.avg_income.toLocaleString()} CAD<br>` +
-          `<strong>Target Retail Node:</strong> ${feature.properties.target}`
+          `<div style="font-size:12.5px;">` +
+          `<strong>Municipality / District:</strong> ${feature.properties.name}<br>` +
+          `<strong>Metro Region:</strong> ${feature.properties.city}<br>` +
+          `<strong>Avg Household Income:</strong> <span style="color:#00441b;font-weight:700;">$${feature.properties.avg_income.toLocaleString()} CAD</span><br>` +
+          `<em>${feature.properties.note}</em></div>`
+        );
+        layer.bindTooltip(
+          `${feature.properties.name.split('(')[0].trim()}<br>$${(feature.properties.avg_income/1000).toFixed(0)}k`,
+          { permanent: false, direction: 'center', className: 'zone-label' }
         );
       }
     }).addTo(map);
 
-    // Pin Helper Function
-    function createCircleMarker(lat, lng, color, radius = 8) {
-      return L.circleMarker([lat, lng], {
-        radius: radius,
-        fillColor: color,
-        color: '#ffffff',
-        weight: 2,
-        opacity: 1,
-        fillOpacity: 0.95
-      });
-    }
+    // ALL 246 RETAIL STORES FROM CSV (With 60m circular offset for same-mall pins so none are hidden)
+    const allStoresData = [
+      {"b": "Uniqlo", "n": "Metropolis at Metrotown (Burnaby, BC)", "lat": 49.2269, "lng": -123.000681, "s": "Flagship"},
+      {"b": "Uniqlo", "n": "CF Richmond Centre (Richmond, BC)", "lat": 49.1666, "lng": -123.135882, "s": "Large"},
+      {"b": "Uniqlo", "n": "Guildford Town Centre (Surrey, BC)", "lat": 49.19, "lng": -122.801782, "s": "Large"},
+      {"b": "Uniqlo", "n": "Coquitlam Centre (Coquitlam, BC)", "lat": 49.2789, "lng": -122.79798, "s": "Large"},
+      {"b": "Uniqlo", "n": "Willowbrook Shopping Centre (Langley, BC)", "lat": 49.1157, "lng": -122.670683, "s": "Standard"},
+      {"b": "Uniqlo", "n": "Tsawwassen Mills (Delta, BC)", "lat": 49.0359, "lng": -123.084885, "s": "Standard"},
+      {"b": "Uniqlo", "n": "Mayfair Shopping Centre (Victoria, BC)", "lat": 48.4485, "lng": -123.370295, "s": "Large"},
+      {"b": "Uniqlo", "n": "CF Chinook Centre (Calgary, AB)", "lat": 50.9984, "lng": -114.072447, "s": "Flagship"},
+      {"b": "Uniqlo", "n": "CF Market Mall (Calgary, AB)", "lat": 51.0844, "lng": -114.154845, "s": "Large"},
+      {"b": "Uniqlo", "n": "CrossIron Mills (Rocky View / Balzac, AB)", "lat": 51.2033, "lng": -113.992642, "s": "Large"},
+      {"b": "Uniqlo", "n": "West Edmonton Mall (Edmonton, AB)", "lat": 53.5225, "lng": -113.623191, "s": "Flagship"},
+      {"b": "Uniqlo", "n": "Southgate Centre (Edmonton, AB)", "lat": 53.4851, "lng": -113.513992, "s": "Large"},
+      {"b": "Uniqlo", "n": "South Edmonton Common (Edmonton, AB)", "lat": 53.4475, "lng": -113.482593, "s": "Large"},
+      {"b": "Uniqlo", "n": "CF Polo Park (Winnipeg, MB)", "lat": 49.8837, "lng": -97.196969, "s": "Large"},
+      {"b": "Uniqlo", "n": "St. Vital Centre (Winnipeg, MB)", "lat": 49.8276, "lng": -97.1095, "s": "Standard"},
+      {"b": "Uniqlo", "n": "CF Toronto Eaton Centre (Toronto, ON)", "lat": 43.6544, "lng": -79.379871, "s": "Flagship"},
+      {"b": "Uniqlo", "n": "Union Station (Toronto, ON)", "lat": 43.6453, "lng": -79.3806, "s": "Large"},
+      {"b": "Uniqlo", "n": "Yorkdale Shopping Centre (Toronto, ON)", "lat": 43.7254, "lng": -79.45137, "s": "Flagship"},
+      {"b": "Uniqlo", "n": "CF Fairview Mall (Toronto, ON)", "lat": 43.7778, "lng": -79.343569, "s": "Large"},
+      {"b": "Uniqlo", "n": "Scarborough Town Centre (Toronto, ON)", "lat": 43.7764, "lng": -79.256669, "s": "Large"},
+      {"b": "Uniqlo", "n": "CF Sherway Gardens (Toronto, ON)", "lat": 43.6111, "lng": -79.556371, "s": "Large"},
+      {"b": "Uniqlo", "n": "Square One Shopping Centre (Mississauga, ON)", "lat": 43.5932, "lng": -79.641672, "s": "Flagship"},
+      {"b": "Uniqlo", "n": "Heartland Town Centre (Mississauga, ON)", "lat": 43.6085, "lng": -79.690671, "s": "Large"},
+      {"b": "Uniqlo", "n": "Bramalea City Centre (Brampton, ON)", "lat": 43.7163, "lng": -79.72127, "s": "Large"},
+      {"b": "Uniqlo", "n": "Vaughan Mills (Vaughan, ON)", "lat": 43.8256, "lng": -79.537268, "s": "Large"},
+      {"b": "Uniqlo", "n": "CF Markville (Markham, ON)", "lat": 43.8681, "lng": -79.287768, "s": "Large"},
+      {"b": "Uniqlo", "n": "Hillcrest Mall (Richmond Hill, ON)", "lat": 43.8548, "lng": -79.434368, "s": "Standard"},
+      {"b": "Uniqlo", "n": "Upper Canada Mall (Newmarket, ON)", "lat": 44.0558, "lng": -79.485565, "s": "Standard"},
+      {"b": "Uniqlo", "n": "Mapleview Shopping Centre (Burlington, ON)", "lat": 43.3259, "lng": -79.818175, "s": "Standard"},
+      {"b": "Uniqlo", "n": "Oshawa Centre (Oshawa, ON)", "lat": 43.8891, "lng": -78.877267, "s": "Standard"},
+      {"b": "Uniqlo", "n": "CF Rideau Centre (Ottawa, ON)", "lat": 45.4255, "lng": -75.690845, "s": "Large"},
+      {"b": "Uniqlo", "n": "Bayshore Shopping Centre (Ottawa, ON)", "lat": 45.3475, "lng": -75.805646, "s": "Large"},
+      {"b": "Uniqlo", "n": "Conestoga Mall (Waterloo, ON - Opening Oct 30, 2026)", "lat": 43.4975, "lng": -80.526773, "s": "Standard"},
+      {"b": "Uniqlo", "n": "St. Laurent Shopping Centre (Ottawa, ON - Opening Early 2027)", "lat": 45.4222, "lng": -75.637645, "s": "Standard"},
+      {"b": "Uniqlo", "n": "Centre Eaton de Montréal (Montreal, QC)", "lat": 45.5029, "lng": -73.5707, "s": "Flagship"},
+      {"b": "Uniqlo", "n": "Royalmount (Mount Royal / Montreal, QC)", "lat": 45.4975, "lng": -73.668644, "s": "Flagship"},
+      {"b": "Uniqlo", "n": "CF Fairview Pointe Claire (Pointe-Claire, QC)", "lat": 45.4622, "lng": -73.830845, "s": "Large"},
+      {"b": "Uniqlo", "n": "CF Galeries d'Anjou (Montreal, QC)", "lat": 45.5992, "lng": -73.561642, "s": "Large"},
+      {"b": "Uniqlo", "n": "CF Carrefour Laval (Laval, QC)", "lat": 45.5701, "lng": -73.751043, "s": "Large"},
+      {"b": "Uniqlo", "n": "CF Promenades St-Bruno (Saint-Bruno-de-Montarville, QC)", "lat": 45.5022, "lng": -73.378344, "s": "Standard"},
+      {"b": "Uniqlo", "n": "Quartier DIX30 (Brossard, QC)", "lat": 45.4418, "lng": -73.439345, "s": "Large"},
+      {"b": "Uniqlo", "n": "Place Ste-Foy (Quebec City, QC)", "lat": 46.7725, "lng": -71.280824, "s": "Large"},
+      {"b": "Uniqlo", "n": "Les Galeries de la Capitale (Quebec City, QC)", "lat": 46.8306, "lng": -71.299723, "s": "Large"},
+      {"b": "Zara", "n": "Robson Street Flagship (Vancouver, BC)", "lat": 49.2842, "lng": -123.1235, "s": "Flagship"},
+      {"b": "Zara", "n": "Park Royal Shopping Centre (West Vancouver, BC)", "lat": 49.3262, "lng": -123.135979, "s": "Large"},
+      {"b": "Zara", "n": "Metropolis at Metrotown (Burnaby, BC)", "lat": 49.2275, "lng": -123.0016, "s": "Flagship"},
+      {"b": "Zara", "n": "CF Richmond Centre (Richmond, BC)", "lat": 49.16712, "lng": -123.137259, "s": "Large"},
+      {"b": "Zara", "n": "CF Chinook Centre (Calgary, AB)", "lat": 50.999, "lng": -114.0734, "s": "Flagship"},
+      {"b": "Zara", "n": "CF Market Mall (Calgary, AB)", "lat": 51.085, "lng": -114.1558, "s": "Large"},
+      {"b": "Zara", "n": "West Edmonton Mall (Edmonton, AB)", "lat": 53.5231, "lng": -113.6242, "s": "Flagship"},
+      {"b": "Zara", "n": "CF Toronto Eaton Centre (Toronto, ON)", "lat": 43.6544, "lng": -79.381529, "s": "Flagship"},
+      {"b": "Zara", "n": "Yorkdale Shopping Centre (Toronto, ON - Flagship Expansion 2027)", "lat": 43.72592, "lng": -79.452615, "s": "Flagship"},
+      {"b": "Zara", "n": "CF Fairview Mall (Toronto, ON)", "lat": 43.7784, "lng": -79.3444, "s": "Large"},
+      {"b": "Zara", "n": "Scarborough Town Centre (Toronto, ON)", "lat": 43.777, "lng": -79.2575, "s": "Large"},
+      {"b": "Zara", "n": "CF Sherway Gardens (Toronto, ON)", "lat": 43.61162, "lng": -79.557614, "s": "Large"},
+      {"b": "Zara", "n": "Square One Shopping Centre (Mississauga, ON)", "lat": 43.5938, "lng": -79.6425, "s": "Flagship"},
+      {"b": "Zara", "n": "CF Markville (Markham, ON)", "lat": 43.8687, "lng": -79.2886, "s": "Large"},
+      {"b": "Zara", "n": "Upper Canada Mall (Newmarket, ON)", "lat": 44.0564, "lng": -79.4864, "s": "Standard"},
+      {"b": "Zara", "n": "Mapleview Shopping Centre (Burlington, ON)", "lat": 43.3265, "lng": -79.819, "s": "Standard"},
+      {"b": "Zara", "n": "Oshawa Centre (Oshawa, ON)", "lat": 43.8897, "lng": -78.8781, "s": "Standard"},
+      {"b": "Zara", "n": "CF Masonville Place (London, ON)", "lat": 43.026, "lng": -81.277879, "s": "Large"},
+      {"b": "Zara", "n": "CF Rideau Centre (Ottawa, ON)", "lat": 45.4261, "lng": -75.6917, "s": "Large"},
+      {"b": "Zara", "n": "Bayshore Shopping Centre (Ottawa, ON)", "lat": 45.3481, "lng": -75.8065, "s": "Large"},
+      {"b": "Zara", "n": "Place Montreal Trust (Montreal, QC)", "lat": 45.5024, "lng": -73.5714, "s": "Flagship"},
+      {"b": "Zara", "n": "Royalmount (Mount Royal / Montreal, QC)", "lat": 45.4981, "lng": -73.6695, "s": "Flagship"},
+      {"b": "Zara", "n": "CF Fairview Pointe Claire (Pointe-Claire, QC)", "lat": 45.4628, "lng": -73.8317, "s": "Large"},
+      {"b": "Zara", "n": "CF Carrefour Laval (Laval, QC)", "lat": 45.5707, "lng": -73.7519, "s": "Flagship"},
+      {"b": "Zara", "n": "Place Rosemère (Rosemère, QC)", "lat": 45.6319, "lng": -73.804942, "s": "Standard"},
+      {"b": "Zara", "n": "CF Promenades St-Bruno (Saint-Bruno-de-Montarville, QC)", "lat": 45.5028, "lng": -73.3792, "s": "Large"},
+      {"b": "Zara", "n": "Quartier DIX30 (Brossard, QC)", "lat": 45.4424, "lng": -73.4402, "s": "Large"},
+      {"b": "Zara", "n": "Place Ste-Foy (Quebec City, QC)", "lat": 46.77302, "lng": -71.282138, "s": "Large"},
+      {"b": "Zara", "n": "Halifax Shopping Centre (Halifax, NS)", "lat": 44.6483, "lng": -63.618357, "s": "Large"},
+      {"b": "Aritzia", "n": "Robson Street (1110 Robson St, Vancouver, BC)", "lat": 49.2846, "lng": -123.1243, "s": "Flagship"},
+      {"b": "Aritzia", "n": "Wilfred Robson Street (1112 Robson St, Vancouver, BC)", "lat": 49.2847, "lng": -123.1244, "s": "Standard"},
+      {"b": "Aritzia", "n": "CF Pacific Centre (Vancouver, BC)", "lat": 49.2825, "lng": -123.11778, "s": "Large"},
+      {"b": "Aritzia", "n": "Wilfred CF Pacific Centre (Vancouver, BC)", "lat": 49.2826, "lng": -123.1188, "s": "Standard"},
+      {"b": "Aritzia", "n": "CF Pacific Centre Robson Flagship (Vancouver, BC - Opening 2027)", "lat": 49.2825, "lng": -123.11962, "s": "Flagship"},
+      {"b": "Aritzia", "n": "Tna South Granville (2899 Granville St, Vancouver, BC)", "lat": 49.2598, "lng": -123.1387, "s": "Standard"},
+      {"b": "Aritzia", "n": "Kitsilano / West 4th (2120 W 4th Ave, Vancouver, BC)", "lat": 49.2681, "lng": -123.1536, "s": "Standard"},
+      {"b": "Aritzia", "n": "Oakridge Park (Vancouver, BC)", "lat": 49.2331, "lng": -123.1165, "s": "Large"},
+      {"b": "Aritzia", "n": "McArthurGlen Designer Outlet (Richmond, BC)", "lat": 49.1969, "lng": -123.1408, "s": "Standard"},
+      {"b": "Aritzia", "n": "CF Richmond Centre (Richmond, BC)", "lat": 49.16608, "lng": -123.137259, "s": "Large"},
+      {"b": "Aritzia", "n": "Metropolis at Metrotown (Burnaby, BC)", "lat": 49.2269, "lng": -123.002519, "s": "Flagship"},
+      {"b": "Aritzia", "n": "The Amazing Brentwood (Burnaby, BC)", "lat": 49.2665, "lng": -123.000481, "s": "Large"},
+      {"b": "Aritzia", "n": "Park Royal Shopping Centre (West Vancouver, BC)", "lat": 49.32672, "lng": -123.13736, "s": "Large"},
+      {"b": "Aritzia", "n": "Wilfred Park Royal (West Vancouver, BC)", "lat": 49.3263, "lng": -123.137, "s": "Standard"},
+      {"b": "Aritzia", "n": "Coquitlam Centre (Coquitlam, BC)", "lat": 49.27942, "lng": -122.79936, "s": "Standard"},
+      {"b": "Aritzia", "n": "Guildford Town Centre (Surrey, BC)", "lat": 49.19052, "lng": -122.803159, "s": "Large"},
+      {"b": "Aritzia", "n": "Willowbrook Shopping Centre (Langley, BC)", "lat": 49.11622, "lng": -122.672058, "s": "Standard"},
+      {"b": "Aritzia", "n": "Tsawwassen Mills (Delta, BC)", "lat": 49.03642, "lng": -123.086258, "s": "Standard"},
+      {"b": "Aritzia", "n": "Highstreet Shopping Centre (Abbotsford, BC)", "lat": 49.0589, "lng": -122.378184, "s": "Standard"},
+      {"b": "Aritzia", "n": "Whistler Village (Whistler, BC)", "lat": 50.1163, "lng": -122.9574, "s": "Standard"},
+      {"b": "Aritzia", "n": "Orchard Park Shopping Centre (Kelowna, BC)", "lat": 49.8801, "lng": -119.441269, "s": "Standard"},
+      {"b": "Aritzia", "n": "Mayfair Shopping Centre (Victoria, BC)", "lat": 48.4485, "lng": -123.372105, "s": "Standard"},
+      {"b": "Aritzia", "n": "The Bay Centre (Victoria, BC)", "lat": 48.4251, "lng": -123.3662, "s": "Standard"},
+      {"b": "Aritzia", "n": "CF Chinook Centre (Calgary, AB)", "lat": 50.9984, "lng": -114.074353, "s": "Flagship"},
+      {"b": "Aritzia", "n": "Wilfred CF Chinook Centre (Calgary, AB)", "lat": 50.9985, "lng": -114.0735, "s": "Standard"},
+      {"b": "Aritzia", "n": "CF Market Mall (Calgary, AB)", "lat": 51.0844, "lng": -114.156755, "s": "Large"},
+      {"b": "Aritzia", "n": "Babaton CF Market Mall (Calgary, AB)", "lat": 51.0845, "lng": -114.1559, "s": "Standard"},
+      {"b": "Aritzia", "n": "The CORE Shopping Centre (Calgary, AB)", "lat": 51.0458, "lng": -114.067646, "s": "Standard"},
+      {"b": "Aritzia", "n": "Southcentre Mall (Calgary, AB)", "lat": 50.9442, "lng": -114.064048, "s": "Standard"},
+      {"b": "Aritzia", "n": "CrossIron Mills (Rocky View / Balzac, AB)", "lat": 51.2047, "lng": -113.9924, "s": "Standard"},
+      {"b": "Aritzia", "n": "West Edmonton Mall (Edmonton, AB)", "lat": 53.5225, "lng": -113.625209, "s": "Flagship"},
+      {"b": "Aritzia", "n": "Southgate Centre (Edmonton, AB)", "lat": 53.4851, "lng": -113.516008, "s": "Large"},
+      {"b": "Aritzia", "n": "Kingsway Mall (Edmonton, AB)", "lat": 53.5625, "lng": -113.50539, "s": "Standard"},
+      {"b": "Aritzia", "n": "Midtown Shopping Centre (Saskatoon, SK)", "lat": 52.1264, "lng": -106.666923, "s": "Standard"},
+      {"b": "Aritzia", "n": "Cornwall Centre (Regina, SK)", "lat": 50.4508, "lng": -104.608458, "s": "Standard"},
+      {"b": "Aritzia", "n": "CF Polo Park (Winnipeg, MB)", "lat": 49.88422, "lng": -97.198366, "s": "Large"},
+      {"b": "Aritzia", "n": "Bloor Street Flagship / Holt Renfrew Centre (50 Bloor St W, Toronto, ON)", "lat": 43.6702, "lng": -79.3888, "s": "Flagship"},
+      {"b": "Aritzia", "n": "Queen Street West (280 Queen St W, Toronto, ON)", "lat": 43.6493, "lng": -79.3924, "s": "Large"},
+      {"b": "Aritzia", "n": "CF Toronto Eaton Centre (Toronto, ON)", "lat": 43.6542, "lng": -79.3808, "s": "Flagship"},
+      {"b": "Aritzia", "n": "Wilfred CF Toronto Eaton Centre (Toronto, ON)", "lat": 43.6543, "lng": -79.3809, "s": "Standard"},
+      {"b": "Aritzia", "n": "Yorkdale Shopping Centre (Toronto, ON)", "lat": 43.7247, "lng": -79.4571, "s": "Flagship"},
+      {"b": "Aritzia", "n": "Wilfred Yorkdale Shopping Centre (Toronto, ON)", "lat": 43.7248, "lng": -79.4572, "s": "Standard"},
+      {"b": "Aritzia", "n": "Babaton Yorkdale Shopping Centre (Toronto, ON)", "lat": 43.7249, "lng": -79.4573, "s": "Standard"},
+      {"b": "Aritzia", "n": "CF Sherway Gardens (Toronto, ON)", "lat": 43.6127, "lng": -79.556, "s": "Large"},
+      {"b": "Aritzia", "n": "Wilfred CF Sherway Gardens (Toronto, ON)", "lat": 43.6128, "lng": -79.5561, "s": "Standard"},
+      {"b": "Aritzia", "n": "CF Fairview Mall (Toronto, ON)", "lat": 43.7778, "lng": -79.345231, "s": "Large"},
+      {"b": "Aritzia", "n": "CF Shops at Don Mills (Toronto, ON)", "lat": 43.7347, "lng": -79.34497, "s": "Standard"},
+      {"b": "Aritzia", "n": "Scarborough Town Centre (Toronto, ON)", "lat": 43.7764, "lng": -79.258331, "s": "Large"},
+      {"b": "Aritzia", "n": "Square One Shopping Centre (Mississauga, ON)", "lat": 43.5932, "lng": -79.643328, "s": "Flagship"},
+      {"b": "Aritzia", "n": "Wilfred Square One Shopping Centre (Mississauga, ON)", "lat": 43.5933, "lng": -79.6426, "s": "Standard"},
+      {"b": "Aritzia", "n": "Bramalea City Centre (Brampton, ON)", "lat": 43.71682, "lng": -79.722515, "s": "Standard"},
+      {"b": "Aritzia", "n": "Toronto Premium Outlets (Halton Hills, ON)", "lat": 43.5752, "lng": -79.828772, "s": "Standard"},
+      {"b": "Aritzia", "n": "Vaughan Mills (Vaughan, ON)", "lat": 43.82612, "lng": -79.538516, "s": "Large"},
+      {"b": "Aritzia", "n": "Promenade Shopping Centre (Thornhill, ON)", "lat": 43.8073, "lng": -79.450769, "s": "Standard"},
+      {"b": "Aritzia", "n": "Hillcrest Mall (Richmond Hill, ON)", "lat": 43.85532, "lng": -79.435616, "s": "Standard"},
+      {"b": "Aritzia", "n": "CF Markville (Markham, ON)", "lat": 43.8681, "lng": -79.289432, "s": "Large"},
+      {"b": "Aritzia", "n": "Upper Canada Mall (Newmarket, ON)", "lat": 44.0558, "lng": -79.487235, "s": "Standard"},
+      {"b": "Aritzia", "n": "Oakville Place (Oakville, ON)", "lat": 43.4619, "lng": -79.686373, "s": "Standard"},
+      {"b": "Aritzia", "n": "Mapleview Shopping Centre (Burlington, ON)", "lat": 43.3259, "lng": -79.819825, "s": "Standard"},
+      {"b": "Aritzia", "n": "CF Lime Ridge (Hamilton, ON)", "lat": 43.2182, "lng": -79.861077, "s": "Standard"},
+      {"b": "Aritzia", "n": "Oshawa Centre (Oshawa, ON)", "lat": 43.8891, "lng": -78.878933, "s": "Standard"},
+      {"b": "Aritzia", "n": "Conestoga Mall (Waterloo, ON)", "lat": 43.49802, "lng": -80.528014, "s": "Standard"},
+      {"b": "Aritzia", "n": "CF Fairview Park (Kitchener, ON)", "lat": 43.4251, "lng": -80.438574, "s": "Standard"},
+      {"b": "Aritzia", "n": "CF Masonville Place (London, ON)", "lat": 43.02652, "lng": -81.27911, "s": "Standard"},
+      {"b": "Aritzia", "n": "Devonshire Mall (Windsor, ON)", "lat": 42.2739, "lng": -82.998389, "s": "Standard"},
+      {"b": "Aritzia", "n": "CF Rideau Centre (Ottawa, ON)", "lat": 45.4255, "lng": -75.692555, "s": "Large"},
+      {"b": "Aritzia", "n": "Bayshore Shopping Centre (Ottawa, ON)", "lat": 45.3475, "lng": -75.807354, "s": "Standard"},
+      {"b": "Aritzia", "n": "Sainte-Catherine Flagship (1125 Rue Sainte-Catherine O, Montreal, QC)", "lat": 45.5002, "lng": -73.5735, "s": "Flagship"},
+      {"b": "Aritzia", "n": "Royalmount (Mount Royal / Montreal, QC)", "lat": 45.4975, "lng": -73.670356, "s": "Flagship"},
+      {"b": "Aritzia", "n": "CF Fairview Pointe Claire (Pointe-Claire, QC)", "lat": 45.4622, "lng": -73.832555, "s": "Large"},
+      {"b": "Aritzia", "n": "CF Carrefour Laval (Laval, QC)", "lat": 45.5701, "lng": -73.752757, "s": "Large"},
+      {"b": "Aritzia", "n": "CF Promenades St-Bruno (Saint-Bruno-de-Montarville, QC)", "lat": 45.5022, "lng": -73.380056, "s": "Standard"},
+      {"b": "Aritzia", "n": "Quartier DIX30 (Brossard, QC)", "lat": 45.4418, "lng": -73.441055, "s": "Standard"},
+      {"b": "Aritzia", "n": "Place Ste-Foy (Quebec City, QC)", "lat": 46.77198, "lng": -71.282138, "s": "Standard"},
+      {"b": "Aritzia", "n": "Halifax Shopping Centre (Halifax, NS)", "lat": 44.64882, "lng": -63.619622, "s": "Standard"},
+      {"b": "H&M", "n": "CF Pacific Centre (Vancouver, BC)", "lat": 49.2833, "lng": -123.118, "s": "Flagship"},
+      {"b": "H&M", "n": "Metropolis at Metrotown (Burnaby, BC)", "lat": 49.2263, "lng": -123.0016, "s": "Flagship"},
+      {"b": "H&M", "n": "The Amazing Brentwood (Burnaby, BC)", "lat": 49.2665, "lng": -123.002319, "s": "Large"},
+      {"b": "H&M", "n": "Park Royal Shopping Centre (West Vancouver, BC)", "lat": 49.32568, "lng": -123.13736, "s": "Large"},
+      {"b": "H&M", "n": "CF Richmond Centre (Richmond, BC)", "lat": 49.1666, "lng": -123.138, "s": "Large"},
+      {"b": "H&M", "n": "Tsawwassen Mills (Delta, BC)", "lat": 49.03538, "lng": -123.086258, "s": "Large"},
+      {"b": "H&M", "n": "Coquitlam Centre (Coquitlam, BC)", "lat": 49.27838, "lng": -122.79936, "s": "Large"},
+      {"b": "H&M", "n": "Guildford Town Centre (Surrey, BC)", "lat": 49.18948, "lng": -122.803159, "s": "Large"},
+      {"b": "H&M", "n": "Willowbrook Shopping Centre (Langley, BC)", "lat": 49.11518, "lng": -122.672058, "s": "Standard"},
+      {"b": "H&M", "n": "Highstreet Shopping Centre (Abbotsford, BC)", "lat": 49.0589, "lng": -122.380016, "s": "Standard"},
+      {"b": "H&M", "n": "Orchard Park Shopping Centre (Kelowna, BC)", "lat": 49.8801, "lng": -119.443131, "s": "Standard"},
+      {"b": "H&M", "n": "Uptown Shopping Centre (Victoria, BC)", "lat": 48.4552, "lng": -123.3765, "s": "Large"},
+      {"b": "H&M", "n": "CF Chinook Centre (Calgary, AB)", "lat": 50.9978, "lng": -114.0734, "s": "Flagship"},
+      {"b": "H&M", "n": "CF Market Mall (Calgary, AB)", "lat": 51.0838, "lng": -114.1558, "s": "Large"},
+      {"b": "H&M", "n": "The CORE Shopping Centre (Calgary, AB)", "lat": 51.0458, "lng": -114.069554, "s": "Large"},
+      {"b": "H&M", "n": "Southcentre Mall (Calgary, AB)", "lat": 50.9442, "lng": -114.065952, "s": "Large"},
+      {"b": "H&M", "n": "Sunridge Mall (Calgary, AB)", "lat": 51.0747, "lng": -113.9878, "s": "Standard"},
+      {"b": "H&M", "n": "CrossIron Mills (Rocky View / Balzac, AB)", "lat": 51.2033, "lng": -113.994558, "s": "Large"},
+      {"b": "H&M", "n": "West Edmonton Mall (Edmonton, AB)", "lat": 53.5219, "lng": -113.6242, "s": "Flagship"},
+      {"b": "H&M", "n": "Kingsway Mall (Edmonton, AB)", "lat": 53.5625, "lng": -113.50741, "s": "Large"},
+      {"b": "H&M", "n": "Londonderry Mall (Edmonton, AB)", "lat": 53.6006, "lng": -113.4428, "s": "Standard"},
+      {"b": "H&M", "n": "South Edmonton Common (Edmonton, AB)", "lat": 53.4475, "lng": -113.484607, "s": "Large"},
+      {"b": "H&M", "n": "Bower Place (Red Deer, AB)", "lat": 52.2472, "lng": -113.8122, "s": "Standard"},
+      {"b": "H&M", "n": "Park Place Mall (Lethbridge, AB)", "lat": 49.6975, "lng": -112.8397, "s": "Standard"},
+      {"b": "H&M", "n": "Midtown Shopping Centre (Saskatoon, SK)", "lat": 52.1264, "lng": -106.668877, "s": "Large"},
+      {"b": "H&M", "n": "Cornwall Centre (Regina, SK)", "lat": 50.4508, "lng": -104.610342, "s": "Large"},
+      {"b": "H&M", "n": "CF Polo Park (Winnipeg, MB)", "lat": 49.88318, "lng": -97.198366, "s": "Large"},
+      {"b": "H&M", "n": "Kildonan Place (Winnipeg, MB)", "lat": 49.8975, "lng": -97.0608, "s": "Standard"},
+      {"b": "H&M", "n": "CF Toronto Eaton Centre (1 Dundas St W, Toronto, ON)", "lat": 43.6561, "lng": -79.381, "s": "Flagship"},
+      {"b": "H&M", "n": "Bloor Street (15 Bloor St W, Toronto, ON)", "lat": 43.67, "lng": -79.3872, "s": "Flagship"},
+      {"b": "H&M", "n": "Queen Street West (427 Queen St W, Toronto, ON)", "lat": 43.6483, "lng": -79.3956, "s": "Large"},
+      {"b": "H&M", "n": "Yonge Eglinton Centre (Toronto, ON)", "lat": 43.7072, "lng": -79.3986, "s": "Large"},
+      {"b": "H&M", "n": "Yorkdale Shopping Centre (Toronto, ON)", "lat": 43.72488, "lng": -79.452615, "s": "Flagship"},
+      {"b": "H&M", "n": "CF Fairview Mall (Toronto, ON)", "lat": 43.7772, "lng": -79.3444, "s": "Large"},
+      {"b": "H&M", "n": "CF Shops at Don Mills (Toronto, ON)", "lat": 43.7347, "lng": -79.34663, "s": "Large"},
+      {"b": "H&M", "n": "Scarborough Town Centre (Toronto, ON)", "lat": 43.7758, "lng": -79.2575, "s": "Large"},
+      {"b": "H&M", "n": "CF Sherway Gardens (Toronto, ON)", "lat": 43.61058, "lng": -79.557614, "s": "Large"},
+      {"b": "H&M", "n": "Dufferin Mall (Toronto, ON)", "lat": 43.6561, "lng": -79.4353, "s": "Standard"},
+      {"b": "H&M", "n": "Square One Shopping Centre (Mississauga, ON)", "lat": 43.5926, "lng": -79.6425, "s": "Flagship"},
+      {"b": "H&M", "n": "Erin Mills Town Centre (Mississauga, ON)", "lat": 43.5583, "lng": -79.7131, "s": "Standard"},
+      {"b": "H&M", "n": "Heartland Town Centre (Mississauga, ON)", "lat": 43.6085, "lng": -79.692329, "s": "Large"},
+      {"b": "H&M", "n": "Bramalea City Centre (Brampton, ON)", "lat": 43.71578, "lng": -79.722515, "s": "Large"},
+      {"b": "H&M", "n": "Trinity Common Mall (Brampton, ON)", "lat": 43.7336, "lng": -79.7547, "s": "Standard"},
+      {"b": "H&M", "n": "Toronto Premium Outlets (Halton Hills, ON)", "lat": 43.5752, "lng": -79.830428, "s": "Standard"},
+      {"b": "H&M", "n": "Vaughan Mills (Vaughan, ON)", "lat": 43.82508, "lng": -79.538516, "s": "Large"},
+      {"b": "H&M", "n": "Promenade Shopping Centre (Thornhill, ON)", "lat": 43.8073, "lng": -79.452431, "s": "Standard"},
+      {"b": "H&M", "n": "Hillcrest Mall (Richmond Hill, ON)", "lat": 43.85428, "lng": -79.435616, "s": "Standard"},
+      {"b": "H&M", "n": "CF Markville (Markham, ON)", "lat": 43.8675, "lng": -79.2886, "s": "Large"},
+      {"b": "H&M", "n": "Upper Canada Mall (Newmarket, ON)", "lat": 44.0552, "lng": -79.4864, "s": "Large"},
+      {"b": "H&M", "n": "Pickering Town Centre (Pickering, ON)", "lat": 43.8358, "lng": -79.0853, "s": "Standard"},
+      {"b": "H&M", "n": "Oshawa Centre (Oshawa, ON)", "lat": 43.8885, "lng": -78.8781, "s": "Large"},
+      {"b": "H&M", "n": "Oakville Place (Oakville, ON)", "lat": 43.4619, "lng": -79.688027, "s": "Standard"},
+      {"b": "H&M", "n": "Mapleview Shopping Centre (Burlington, ON)", "lat": 43.3253, "lng": -79.819, "s": "Large"},
+      {"b": "H&M", "n": "CF Lime Ridge (Hamilton, ON)", "lat": 43.2182, "lng": -79.862723, "s": "Large"},
+      {"b": "H&M", "n": "The Pen Centre (St. Catharines, ON)", "lat": 43.1361, "lng": -79.2225, "s": "Standard"},
+      {"b": "H&M", "n": "Cambridge Centre (Cambridge, ON)", "lat": 43.3936, "lng": -80.3208, "s": "Standard"},
+      {"b": "H&M", "n": "CF Fairview Park (Kitchener, ON)", "lat": 43.4251, "lng": -80.440226, "s": "Large"},
+      {"b": "H&M", "n": "Conestoga Mall (Waterloo, ON)", "lat": 43.49698, "lng": -80.528014, "s": "Large"},
+      {"b": "H&M", "n": "Stone Road Mall (Guelph, ON)", "lat": 43.5186, "lng": -80.2389, "s": "Standard"},
+      {"b": "H&M", "n": "CF Masonville Place (London, ON)", "lat": 43.02548, "lng": -81.27911, "s": "Large"},
+      {"b": "H&M", "n": "White Oaks Mall (London, ON)", "lat": 42.9317, "lng": -81.2256, "s": "Standard"},
+      {"b": "H&M", "n": "Devonshire Mall (Windsor, ON)", "lat": 42.2739, "lng": -83.000011, "s": "Standard"},
+      {"b": "H&M", "n": "Lambton Mall (Sarnia, ON)", "lat": 42.9772, "lng": -82.3578, "s": "Standard"},
+      {"b": "H&M", "n": "Georgian Mall (Barrie, ON)", "lat": 44.4139, "lng": -79.7076, "s": "Standard"},
+      {"b": "H&M", "n": "Lansdowne Place (Peterborough, ON)", "lat": 44.2831, "lng": -78.3375, "s": "Standard"},
+      {"b": "H&M", "n": "Cataraqui Centre (Kingston, ON)", "lat": 44.2564, "lng": -76.5697, "s": "Standard"},
+      {"b": "H&M", "n": "Bayshore Shopping Centre (Ottawa, ON)", "lat": 45.3469, "lng": -75.8065, "s": "Large"},
+      {"b": "H&M", "n": "CF Rideau Centre (Ottawa, ON)", "lat": 45.4249, "lng": -75.6917, "s": "Flagship"},
+      {"b": "H&M", "n": "Place d'Orléans (Ottawa, ON)", "lat": 45.4775, "lng": -75.5169, "s": "Standard"},
+      {"b": "H&M", "n": "St. Laurent Shopping Centre (Ottawa, ON)", "lat": 45.4222, "lng": -75.639355, "s": "Large"},
+      {"b": "H&M", "n": "Tanger Outlets Ottawa (Kanata / Ottawa, ON)", "lat": 45.2975, "lng": -75.9369, "s": "Standard"},
+      {"b": "H&M", "n": "New Sudbury Centre (Sudbury, ON)", "lat": 46.5197, "lng": -80.9392, "s": "Standard"},
+      {"b": "H&M", "n": "Rue Sainte-Catherine Ouest Flagship (Montreal, QC)", "lat": 45.5, "lng": -73.573, "s": "Flagship"},
+      {"b": "H&M", "n": "Royalmount (Mount Royal / Montreal, QC)", "lat": 45.4969, "lng": -73.6695, "s": "Large"},
+      {"b": "H&M", "n": "Centre Rockland (Mount Royal / Montreal, QC)", "lat": 45.5256, "lng": -73.6458, "s": "Standard"},
+      {"b": "H&M", "n": "CF Fairview Pointe Claire (Pointe-Claire, QC)", "lat": 45.4616, "lng": -73.8317, "s": "Large"},
+      {"b": "H&M", "n": "CF Galeries d'Anjou (Montreal, QC)", "lat": 45.5992, "lng": -73.563358, "s": "Large"},
+      {"b": "H&M", "n": "Carrefour Angrignon (LaSalle / Montreal, QC)", "lat": 45.4422, "lng": -73.6067, "s": "Standard"},
+      {"b": "H&M", "n": "Place Versailles (Montreal, QC)", "lat": 45.5928, "lng": -73.5397, "s": "Standard"},
+      {"b": "H&M", "n": "CF Carrefour Laval (Laval, QC)", "lat": 45.5695, "lng": -73.7519, "s": "Flagship"},
+      {"b": "H&M", "n": "Centre Laval (Laval, QC)", "lat": 45.5578, "lng": -73.7208, "s": "Standard"},
+      {"b": "H&M", "n": "Place Rosemère (Rosemère, QC)", "lat": 45.6319, "lng": -73.806658, "s": "Large"},
+      {"b": "H&M", "n": "Carrefour du Nord (Saint-Jérôme, QC)", "lat": 45.7764, "lng": -74.0225, "s": "Standard"},
+      {"b": "H&M", "n": "CF Promenades St-Bruno (Saint-Bruno-de-Montarville, QC)", "lat": 45.5016, "lng": -73.3792, "s": "Large"},
+      {"b": "H&M", "n": "Quartier DIX30 (Brossard, QC)", "lat": 45.4412, "lng": -73.4402, "s": "Large"},
+      {"b": "H&M", "n": "Mail Champlain (Brossard, QC)", "lat": 45.4744, "lng": -73.4678, "s": "Standard"},
+      {"b": "H&M", "n": "Les Promenades Gatineau (Gatineau, QC)", "lat": 45.4772, "lng": -75.7022, "s": "Large"},
+      {"b": "H&M", "n": "Carrefour de l'Estrie (Sherbrooke, QC)", "lat": 45.4025, "lng": -71.9569, "s": "Standard"},
+      {"b": "H&M", "n": "Centre Les Rivières (Trois-Rivières, QC)", "lat": 46.3578, "lng": -72.5836, "s": "Standard"},
+      {"b": "H&M", "n": "Les Galeries de la Capitale (Quebec City, QC)", "lat": 46.8306, "lng": -71.301477, "s": "Large"},
+      {"b": "H&M", "n": "Laurier Québec (Quebec City, QC)", "lat": 46.7703, "lng": -71.2856, "s": "Large"},
+      {"b": "H&M", "n": "Place du Royaume (Chicoutimi / Saguenay, QC)", "lat": 48.4044, "lng": -71.0564, "s": "Standard"},
+      {"b": "H&M", "n": "Champlain Place (Dieppe / Moncton, NB)", "lat": 46.0958, "lng": -64.7603, "s": "Standard"},
+      {"b": "H&M", "n": "Regent Mall (Fredericton, NB)", "lat": 45.9369, "lng": -66.6639, "s": "Standard"},
+      {"b": "H&M", "n": "McAllister Place (Saint John, NB)", "lat": 45.3119, "lng": -66.0172, "s": "Standard"},
+      {"b": "H&M", "n": "Halifax Shopping Centre (Halifax, NS)", "lat": 44.64778, "lng": -63.619622, "s": "Large"},
+      {"b": "H&M", "n": "Mic Mac Mall (Dartmouth, NS)", "lat": 44.6869, "lng": -63.5586, "s": "Standard"},
+      {"b": "H&M", "n": "Charlottetown Mall (Charlottetown, PE)", "lat": 46.2694, "lng": -63.1442, "s": "Standard"},
+      {"b": "H&M", "n": "Avalon Mall (St. John's, NL)", "lat": 47.5615, "lng": -52.7523, "s": "Standard"}
+    ];
 
-    // 1. Proposed UNIQLO Flagship/Large Target Opportunities (Gold Star/Red Border)
+    // Layer Groups for Toggleable Filtering
+    const uniqloLayer = L.layerGroup().addTo(map);
+    const aritziaLayer = L.layerGroup().addTo(map);
+    const zaraLayer = L.layerGroup().addTo(map);
+    const hmLayer = L.layerGroup().addTo(map);
+    const targetLayer = L.layerGroup().addTo(map);
+
+    const brandColors = {
+      "Uniqlo": "#FF0000",
+      "Aritzia": "#111111",
+      "Zara": "#2563EB",
+      "H&M": "#9333EA"
+    };
+
+    const sizeRadii = {
+      "Flagship": 8.5,
+      "Large": 6.5,
+      "Standard": 5
+    };
+
+    // Plot all 246 stores
+    allStoresData.forEach(store => {
+      const marker = L.circleMarker([store.lat, store.lng], {
+        pane: 'storePane',
+        radius: sizeRadii[store.s] || 6,
+        fillColor: brandColors[store.b],
+        color: '#ffffff',
+        weight: 1.8,
+        opacity: 1,
+        fillOpacity: 0.92
+      }).bindPopup(
+        `<div style="font-size:12.5px;">` +
+        `<strong style="color:${brandColors[store.b]}; font-size:13.5px;">${store.b.toUpperCase()}</strong><br>` +
+        `<strong>Store:</strong> ${store.n}<br>` +
+        `<strong>Size Category:</strong> ${store.s}</div>`
+      );
+
+      if (store.b === "Uniqlo") uniqloLayer.addLayer(marker);
+      else if (store.b === "Aritzia") aritziaLayer.addLayer(marker);
+      else if (store.b === "Zara") zaraLayer.addLayer(marker);
+      else if (store.b === "H&M") hmLayer.addLayer(marker);
+    });
+
+    // Proposed UNIQLO Flagship/Large Target Opportunities (Gold Star/Red Border)
     const targetOpportunities = [
-      { name: "TARGET FLAGSHIP: CF Pacific Centre / Robson St (Vancouver)", lat: 49.2825, lng: -123.1187, size: "Flagship (>20,000 sq. ft.)", income: "$148,000+", space: "Former Nordstrom upper wing & 1100/1700-block Robson spaces available" },
-      { name: "TARGET FLAGSHIP: Bloor-Yorkville (1 Bloor W / 55 Bloor W, Toronto)", lat: 43.6702, lng: -79.3888, size: "Flagship (>20,000 sq. ft.)", income: "$295,000+", space: "1 Bloor St W (9,365+ sq. ft. Q1 2027) & 1 Bloor E / 55 Bloor W podiums" },
-      { name: "TARGET LARGE: Park Royal Shopping Centre (West Vancouver)", lat: 49.3262, lng: -123.1369, size: "Large (15,000–20,000 sq. ft.)", income: "$235,000+", space: "34,000+ sq. ft. anchor restructuring vacancies (2026)" },
-      { name: "TARGET LARGE: Oakridge Park Redevelopment (Vancouver)", lat: 49.2331, lng: -123.1165, size: "Large (15,000–20,000 sq. ft.)", income: "$215,000+", space: "New luxury mall expansion concourse units" },
-      { name: "TARGET LARGE: CF Shops at Don Mills (Toronto)", lat: 43.7347, lng: -79.3458, size: "Large (15,000 sq. ft.)", income: "$340,000+", space: "Open-air lifestyle anchor suites" },
-      { name: "TARGET LARGE: Halifax Shopping Centre (Halifax, NS)", lat: 44.6483, lng: -63.6192, size: "Large (15,000–20,000 sq. ft.)", income: "$158,000+", space: "Primaris REIT large-format redevelopment wing (82% occupancy)" },
-      { name: "TARGET LARGE: CF Masonville Place (London, ON)", lat: 43.0260, lng: -81.2787, size: "Large (15,000 sq. ft.)", income: "$168,000+", space: "Anchor wing reconfiguration spaces" },
-      { name: "TARGET LARGE: The Amazing Brentwood (Burnaby, BC)", lat: 49.2665, lng: -123.0014, size: "Large (15,000 sq. ft.)", income: "$135,000+", space: "Plaza level large-format retail units" },
-      { name: "TARGET LARGE: Southcentre Mall (Calgary, AB)", lat: 50.9442, lng: -114.0650, size: "Large (15,000 sq. ft.)", income: "$182,000+", space: "Vacated department store wing space" }
+      { name: "TARGET FLAGSHIP: CF Pacific Centre / Robson St (Vancouver)", lat: 49.2835, lng: -123.1205, size: "Flagship (>20,000 sq. ft.)", income: "$148,000+", space: "Former Nordstrom upper wing & 1100/1700-block Robson spaces available" },
+      { name: "TARGET FLAGSHIP: Bloor-Yorkville (1 Bloor W / 55 Bloor W, Toronto)", lat: 43.6702, lng: -79.3880, size: "Flagship (>20,000 sq. ft.)", income: "$295,000+", space: "1 Bloor St W (9,365+ sq. ft. Q1 2027) & 1 Bloor E / 55 Bloor W podiums" },
+      { name: "TARGET LARGE: Park Royal Shopping Centre (West Vancouver)", lat: 49.3272, lng: -123.1365, size: "Large (15,000–20,000 sq. ft.)", income: "$235,000+", space: "34,000+ sq. ft. anchor restructuring vacancies (2026)" },
+      { name: "TARGET LARGE: Oakridge Park Redevelopment (Vancouver)", lat: 49.2325, lng: -123.1160, size: "Large (15,000–20,000 sq. ft.)", income: "$215,000+", space: "New luxury mall expansion concourse units" },
+      { name: "TARGET LARGE: CF Shops at Don Mills (Toronto)", lat: 43.7354, lng: -79.3458, size: "Large (15,000 sq. ft.)", income: "$340,000+", space: "Open-air lifestyle anchor suites" },
+      { name: "TARGET LARGE: Queen Street West (Toronto)", lat: 43.6488, lng: -79.3940, size: "Large (15,000 sq. ft.)", income: "$145,000+", space: "Multi-level heritage retail buildings between Beverley & Spadina" },
+      { name: "TARGET LARGE: Halifax Shopping Centre (Halifax, NS)", lat: 44.6492, lng: -63.6190, size: "Large (15,000–20,000 sq. ft.)", income: "$158,000+", space: "Primaris REIT large-format redevelopment wing (82% occupancy)" },
+      { name: "TARGET LARGE: CF Masonville Place (London, ON)", lat: 43.0270, lng: -81.2785, size: "Large (15,000 sq. ft.)", income: "$168,000+", space: "Anchor wing reconfiguration spaces" },
+      { name: "TARGET LARGE: The Amazing Brentwood (Burnaby, BC)", lat: 49.2672, lng: -123.0014, size: "Large (15,000 sq. ft.)", income: "$135,000+", space: "Plaza level large-format retail units" },
+      { name: "TARGET LARGE: Southcentre Mall (Calgary, AB)", lat: 50.9450, lng: -114.0650, size: "Large (15,000 sq. ft.)", income: "$182,000+", space: "Vacated department store wing space" }
     ];
 
     targetOpportunities.forEach(loc => {
-      L.circleMarker([loc.lat, loc.lng], {
+      const targetPin = L.circleMarker([loc.lat, loc.lng], {
+        pane: 'targetPane',
         radius: 11, fillColor: '#FFD700', color: '#FF0000', weight: 3, fillOpacity: 1
       }).bindPopup(
         `<div style="font-size:13px;">` +
         `<strong style="color:#d00000;">★ ${loc.name}</strong><br>` +
         `<strong>Recommended Format:</strong> ${loc.size}<br>` +
-        `<strong>Neighbourhood Avg Income:</strong> ${loc.income}<br>` +
+        `<strong>Municipal/District Avg Income:</strong> ${loc.income}<br>` +
         `<strong>Real Estate Availability:</strong> ${loc.space}<br>` +
         `<em>Competitor Check: Aritzia Present | UNIQLO Absent</em></div>`
-      ).addTo(map);
+      );
+      targetLayer.addLayer(targetPin);
     });
 
-    // 2. Existing UNIQLO Locations (Red Pins)
-    const uniqloStores = [
-      { name: "UNIQLO Metropolis at Metrotown (Flagship)", lat: 49.2269, lng: -123.0016 },
-      { name: "UNIQLO CF Richmond Centre (Large)", lat: 49.1666, lng: -123.1368 },
-      { name: "UNIQLO CF Toronto Eaton Centre (Flagship)", lat: 43.6544, lng: -79.3807 },
-      { name: "UNIQLO Yorkdale Shopping Centre (Flagship)", lat: 43.7254, lng: -79.4522 },
-      { name: "UNIQLO CF Fairview Mall (Large)", lat: 43.7778, lng: -79.3444 },
-      { name: "UNIQLO CF Chinook Centre (Flagship)", lat: 50.9984, lng: -114.0734 }
-    ];
-    uniqloStores.forEach(s => createCircleMarker(s.lat, s.lng, '#FF0000', 7).bindPopup(`<strong>${s.name}</strong>`).addTo(map));
+    // Add Interactive Layer Filter Control (bottom-left)
+    L.control.layers(null, {
+      "★ Proposed UNIQLO Targets (10)": targetLayer,
+      "UNIQLO Stores (43)": uniqloLayer,
+      "Aritzia Boutiques (75)": aritziaLayer,
+      "Zara Stores (29)": zaraLayer,
+      "H&M Stores (99)": hmLayer,
+      "Municipal Income Boundaries": incomeLayer
+    }, { collapsed: false, position: 'bottomleft' }).addTo(map);
 
-    // 3. Existing Aritzia Locations in Target Gap Zones (Black Pins)
-    const aritziaStores = [
-      { name: "Aritzia Robson St Flagship", lat: 49.2846, lng: -123.1243 },
-      { name: "Aritzia CF Pacific Centre (2027 Flagship)", lat: 49.2830, lng: -123.1195 },
-      { name: "Aritzia Park Royal", lat: 49.3268, lng: -123.1375 },
-      { name: "Aritzia Oakridge Park", lat: 49.2336, lng: -123.1172 },
-      { name: "Aritzia Kitsilano W 4th", lat: 49.2681, lng: -123.1536 },
-      { name: "Aritzia Bloor Street Flagship", lat: 43.6705, lng: -79.3895 },
-      { name: "Aritzia Queen Street West", lat: 43.6493, lng: -79.3924 },
-      { name: "Aritzia CF Shops at Don Mills", lat: 43.7352, lng: -79.3465 },
-      { name: "Aritzia CF Masonville Place", lat: 43.0265, lng: -81.2792 },
-      { name: "Aritzia Halifax Shopping Centre", lat: 44.6488, lng: -63.6198 }
-    ];
-    aritziaStores.forEach(s => createCircleMarker(s.lat, s.lng, '#111111', 6).bindPopup(`<strong>${s.name}</strong> (Competitor)`).addTo(map));
-
-    // Add Legend
+    // Add Legend (bottom-right)
     const legend = L.control({ position: 'bottomright' });
     legend.onAdd = function() {
       const div = L.DomUtil.create('div', 'legend');
       div.innerHTML = `
-        <h4>Store & Target Pins</h4>
-        <div><span class="pin-dot" style="background:#FFD700; border-color:#FF0000;"></span><strong>Proposed UNIQLO Target</strong> (Gap)</div>
-        <div><span class="pin-dot" style="background:#111111;"></span><strong>Aritzia Boutique</strong> (Competitor)</div>
-        <div><span class="pin-dot" style="background:#FF0000;"></span><strong>Existing UNIQLO Store</strong></div>
-        <h4 style="margin-top:10px;">Avg Household Income (CAD)</h4>
+        <h4>Retail Brands & Targets (246 Stores)</h4>
+        <div><span class="pin-dot" style="background:#FFD700; border-color:#FF0000; width:13px; height:13px;"></span><strong>Proposed UNIQLO Target</strong> (Gap)</div>
+        <div><span class="pin-dot" style="background:#FF0000;"></span><strong>UNIQLO</strong> (43 Locations)</div>
+        <div><span class="pin-dot" style="background:#111111;"></span><strong>Aritzia</strong> (75 Locations)</div>
+        <div><span class="pin-dot" style="background:#2563EB;"></span><strong>Zara</strong> (29 Locations)</div>
+        <div><span class="pin-dot" style="background:#9333EA;"></span><strong>H&M</strong> (99 Locations)</div>
+        <div style="font-size:11px; color:#555; margin-top:3px;"><em>Pin Size: Flagship (Large) &gt; Large (Med) &gt; Standard (Small)</em></div>
+        <h4 style="margin-top:8px;">Municipal Avg Household Income</h4>
         <div><i style="background:#00441b"></i> $220,000+ (Ultra-Affluent)</div>
         <div><i style="background:#1b7837"></i> $175,000 – $220,000</div>
         <div><i style="background:#5aae61"></i> $140,000 – $175,000</div>
         <div><i style="background:#a6dba0"></i> $115,000 – $140,000</div>
+        <div><i style="background:#d9f0d3"></i> $95,000 – $115,000</div>
+        <div><i style="background:#f7fcb9"></i> Under $95,000</div>
       `;
       return div;
     };
